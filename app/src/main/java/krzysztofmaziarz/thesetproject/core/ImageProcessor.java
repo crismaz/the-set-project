@@ -1,6 +1,7 @@
 package krzysztofmaziarz.thesetproject.core;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -13,6 +14,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
+import krzysztofmaziarz.thesetproject.model.Color;
 import krzysztofmaziarz.thesetproject.model.SetFigure;
 
 public class ImageProcessor {
@@ -39,7 +41,18 @@ public class ImageProcessor {
 
                 if (figure.isValid()) {
                     figures.add(figure);
-                    Core.rectangle(imageMat, figure.getBox().tl(), figure.getBox().br(), new Scalar(1));
+
+                    Scalar scalar;
+
+                    if (figure.getColor() == Color.RED) {
+                        scalar = new Scalar(255, 0, 0, 0);
+                    } else if (figure.getColor() == Color.GREEN) {
+                        scalar = new Scalar(0, 255, 0, 0);
+                    } else {
+                        scalar = new Scalar(0, 0, 255, 0);
+                    }
+
+                    Core.rectangle(imageMat, figure.getBox().tl(), figure.getBox().br(), scalar);
                 }
             }
         }
