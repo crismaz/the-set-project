@@ -53,6 +53,8 @@ public class ImageProcessor {
                     }
 
                     Core.rectangle(imageMat, figure.getBox().tl(), figure.getBox().br(), scalar);
+                    Core.putText(imageMat, figure.getShading().toString(), figure.getBox().tl(),
+                            Core.FONT_HERSHEY_PLAIN, 1.0, scalar);
                 }
             }
         }

@@ -12,6 +12,7 @@ import java.util.List;
 public class SetFigure {
     private static final double MIN_RATIO = 1.5;
     private static final double MAX_RATIO = 3.0;
+    private static final double MIN_RELATIVE_AREA = 0.0005;
 
     private Mat image;
     private MatOfPoint contour;
@@ -23,6 +24,8 @@ public class SetFigure {
     private Color color;
     private Shading shading;
     private Shape shape;
+
+    private double[] avgPixelColor;
 
     public SetFigure(Mat image, MatOfPoint contour) {
         this.image = image;
@@ -55,29 +58,37 @@ public class SetFigure {
     }
 
     private void computeValid() {
-        valid = checkRatio(box.height, box.width);
+        valid = checkRatio(box.height, box.width) &&
+                checkArea(box.height * box.width, image.height() * image.width());
     }
 
     private void computeColor() {
-        double[] sum = new double[3];
+        avgPixelColor = new double[3];
 
         for (GridPoint point : points) {
             double[] color = image.get(point.x, point.y);
 
             for (int i = 0; i < 3; i++) {
-                sum[i] += color[i];
+                avgPixelColor[i] += color[i];
             }
         }
 
         for (int i = 0; i < 3; i++) {
-            sum[i] /= points.size();
+            avgPixelColor[i] /= points.size();
         }
 
-        color = Color.classify(sum);
+        color = Color.classify(avgPixelColor);
     }
 
     private void computeShading() {
-        // TODO
+        double[] centerPixelColor = image.get(getCenter().x, getCenter().y);
+
+        double change = 0.0;
+        for (int i = 0; i < 3; i++) {
+            change += centerPixelColor[i] - avgPixelColor[i];
+        }
+
+        shading = Shading.classify(change);
     }
 
     private void computeShape() {
@@ -104,8 +115,19 @@ public class SetFigure {
         return box;
     }
 
+    public GridPoint getCenter() {
+        return new GridPoint(new double[] {
+                (box.br().x + box.tl().x) / 2,
+                (box.br().y + box.tl().y) / 2
+        });
+    }
+
     private static boolean checkRatio(int height, int width) {
         return  height >= width * MIN_RATIO &&
                 height <= width * MAX_RATIO;
+    }
+
+    private static boolean checkArea(int area, int imageArea) {
+        return area >= imageArea * MIN_RELATIVE_AREA;
     }
 }
