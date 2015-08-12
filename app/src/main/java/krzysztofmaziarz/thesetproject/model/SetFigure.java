@@ -2,18 +2,15 @@ package krzysztofmaziarz.thesetproject.model;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SetFigure {
-    private static final double MIN_RATIO = 1.5;
-    private static final double MAX_RATIO = 3.0;
-    private static final double MIN_RELATIVE_AREA = 0.0005;
+import krzysztofmaziarz.thesetproject.core.SetFigureUtils;
 
+public class SetFigure {
     private Mat image;
     private MatOfPoint contour;
     private List<GridPoint> points;
@@ -58,8 +55,8 @@ public class SetFigure {
     }
 
     private void computeValid() {
-        valid = checkRatio(box.height, box.width) &&
-                checkArea(box.height * box.width, image.height() * image.width());
+        valid = SetFigureUtils.checkRatio(box.height, box.width) &&
+                SetFigureUtils.checkArea(box.height * box.width, image.height() * image.width());
     }
 
     private void computeColor() {
@@ -120,14 +117,5 @@ public class SetFigure {
                 (box.br().x + box.tl().x) / 2,
                 (box.br().y + box.tl().y) / 2
         });
-    }
-
-    private static boolean checkRatio(int height, int width) {
-        return  height >= width * MIN_RATIO &&
-                height <= width * MAX_RATIO;
-    }
-
-    private static boolean checkArea(int area, int imageArea) {
-        return area >= imageArea * MIN_RELATIVE_AREA;
     }
 }

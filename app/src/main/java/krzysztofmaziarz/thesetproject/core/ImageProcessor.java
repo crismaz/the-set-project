@@ -1,7 +1,6 @@
 package krzysztofmaziarz.thesetproject.core;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -41,22 +40,26 @@ public class ImageProcessor {
 
                 if (figure.isValid()) {
                     figures.add(figure);
-
-                    Scalar scalar;
-
-                    if (figure.getColor() == Color.RED) {
-                        scalar = new Scalar(255, 0, 0, 0);
-                    } else if (figure.getColor() == Color.GREEN) {
-                        scalar = new Scalar(0, 255, 0, 0);
-                    } else {
-                        scalar = new Scalar(0, 0, 255, 0);
-                    }
-
-                    Core.rectangle(imageMat, figure.getBox().tl(), figure.getBox().br(), scalar);
-                    Core.putText(imageMat, figure.getShading().toString(), figure.getBox().tl(),
-                            Core.FONT_HERSHEY_PLAIN, 1.0, scalar);
                 }
             }
+        }
+
+        figures = SetFigureUtils.filterOutInnerFigures(figures);
+
+        for (SetFigure figure : figures) {
+            Scalar scalar;
+
+            if (figure.getColor() == Color.RED) {
+                scalar = new Scalar(255, 0, 0, 0);
+            } else if (figure.getColor() == Color.GREEN) {
+                scalar = new Scalar(0, 255, 0, 0);
+            } else {
+                scalar = new Scalar(0, 0, 255, 0);
+            }
+
+            Core.rectangle(imageMat, figure.getBox().tl(), figure.getBox().br(), scalar);
+            Core.putText(imageMat, figure.getShading().toString(), figure.getBox().tl(),
+                    Core.FONT_HERSHEY_PLAIN, 1.0, scalar);
         }
 
         Utils.matToBitmap(imageMat, source);
