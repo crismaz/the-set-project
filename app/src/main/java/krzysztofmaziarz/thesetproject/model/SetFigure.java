@@ -6,7 +6,10 @@ import org.opencv.core.Rect;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import krzysztofmaziarz.thesetproject.core.SetFigureUtils;
 
@@ -89,7 +92,47 @@ public class SetFigure {
     }
 
     private void computeShape() {
-        // TODO
+        Map<Integer,Integer> left = new HashMap<>();
+        Map<Integer,Integer> right = new HashMap<>();
+
+        for (GridPoint point : points) {
+            if (left.get(point.x) == null || left.get(point.x) > point.y) {
+                left.put(point.x, point.y);
+            }
+
+            if (right.get(point.x) == null || right.get(point.x) < point.y) {
+                right.put(point.x, point.y);
+            }
+        }
+
+        Collection<Integer> differences = new ArrayList<>();
+
+        for (Integer x : left.keySet()) {
+            Integer leftBound = left.get(x);
+            Integer rightBound = right.get(x);
+
+            if (leftBound < rightBound) {
+                differences.add(rightBound - leftBound);
+            }
+        }
+
+        double mean = 0.0;
+
+        for (Integer diff : differences) {
+            mean += diff;
+        }
+
+        mean /= differences.size();
+
+        double variance = 0.0;
+
+        for (Integer diff : differences) {
+            variance += Math.pow(diff - mean, 2);
+        }
+
+        variance /= differences.size();
+
+        shape = Shape.classify(mean / box.width, Math.sqrt(variance) / box.width);
     }
 
     public boolean isValid() {

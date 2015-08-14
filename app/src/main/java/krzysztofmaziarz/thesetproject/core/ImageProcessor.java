@@ -7,6 +7,8 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -57,8 +59,12 @@ public class ImageProcessor {
                 scalar = new Scalar(0, 0, 255, 0);
             }
 
-            Core.rectangle(imageMat, figure.getBox().tl(), figure.getBox().br(), scalar);
-            Core.putText(imageMat, figure.getShading().toString(), figure.getBox().tl(),
+            Rect box = figure.getBox();
+
+            Core.rectangle(imageMat, box.tl(), box.br(), scalar);
+            Core.putText(imageMat, figure.getShading().toString(), box.tl(),
+                    Core.FONT_HERSHEY_PLAIN, 1.0, scalar);
+            Core.putText(imageMat, figure.getShape().toString(), new Point(box.x, box.y + box.height),
                     Core.FONT_HERSHEY_PLAIN, 1.0, scalar);
         }
 
