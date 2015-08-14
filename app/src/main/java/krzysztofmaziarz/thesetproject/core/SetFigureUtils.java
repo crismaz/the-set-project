@@ -1,12 +1,13 @@
 package krzysztofmaziarz.thesetproject.core;
 
-import android.hardware.Camera;
-
 import org.opencv.core.Rect;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
+import krzysztofmaziarz.thesetproject.model.GridPoint;
+import krzysztofmaziarz.thesetproject.model.SetCard;
 import krzysztofmaziarz.thesetproject.model.SetFigure;
 
 public class SetFigureUtils {
@@ -41,5 +42,54 @@ public class SetFigureUtils {
         }
 
         return result;
+    }
+
+    public static boolean areClose(SetFigure first, SetFigure second) {
+        GridPoint centerFirst = first.getCenter();
+        GridPoint centerSecond = second.getCenter();
+
+        double distance = Math.sqrt(
+                Math.pow(centerFirst.x - centerSecond.x, 2) +
+                Math.pow(centerFirst.y - centerSecond.y, 2)
+        );
+
+        distance /= first.getBox().width;
+
+        return false; // TODO
+    }
+
+    public static boolean areSame(SetFigure first, SetFigure second) {
+        return  first.getColor() == second.getColor() &&
+                first.getShading() == second.getShading() &&
+                first.getShape() == second.getShape();
+    }
+
+    public static boolean areJoinable(SetFigure first, SetFigure second) {
+        return areClose(first, second) && areSame(first, second);
+    }
+
+    public static Rect getBoundingBox(List<SetFigure> figures) {
+        return figures.get(0).getBox(); // TODO
+    }
+
+    public static List<SetCard> extractCards(List<SetFigure> figures) {
+        List<SetCard> cards = new ArrayList<>();
+
+        for (SetFigure figure : figures) {
+            cards.add(new SetCard(figure));
+        }
+
+        for (int i = 0; i < figures.size(); i++) {
+            for (int j = 0; j < figures.size(); j++) {
+                if (areJoinable(figures.get(i), figures.get(j))) {
+                    SetCard merged = SetCard.merge(cards.get(i), cards.get(j));
+
+                    cards.set(i, merged);
+                    cards.set(j, merged);
+                }
+            }
+        }
+
+        return new ArrayList<>(new HashSet<>(cards));
     }
 }

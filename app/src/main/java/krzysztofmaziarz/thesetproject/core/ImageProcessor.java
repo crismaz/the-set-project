@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import krzysztofmaziarz.thesetproject.model.Color;
+import krzysztofmaziarz.thesetproject.model.SetCard;
 import krzysztofmaziarz.thesetproject.model.SetFigure;
 
 public class ImageProcessor {
@@ -47,24 +48,25 @@ public class ImageProcessor {
         }
 
         figures = SetFigureUtils.filterOutInnerFigures(figures);
+        List<SetCard> cards = SetFigureUtils.extractCards(figures);
 
-        for (SetFigure figure : figures) {
+        for (SetCard card : cards) {
             Scalar scalar;
 
-            if (figure.getColor() == Color.RED) {
+            if (card.getColor() == Color.RED) {
                 scalar = new Scalar(255, 0, 0, 0);
-            } else if (figure.getColor() == Color.GREEN) {
+            } else if (card.getColor() == Color.GREEN) {
                 scalar = new Scalar(0, 255, 0, 0);
             } else {
                 scalar = new Scalar(0, 0, 255, 0);
             }
 
-            Rect box = figure.getBox();
+            Rect box = card.getBox();
 
             Core.rectangle(imageMat, box.tl(), box.br(), scalar);
-            Core.putText(imageMat, figure.getShading().toString(), box.tl(),
+            Core.putText(imageMat, card.getShading().toString(), box.tl(),
                     Core.FONT_HERSHEY_PLAIN, 1.0, scalar);
-            Core.putText(imageMat, figure.getShape().toString(), new Point(box.x, box.y + box.height),
+            Core.putText(imageMat, card.getShape().toString(), new Point(box.x, box.y + box.height),
                     Core.FONT_HERSHEY_PLAIN, 1.0, scalar);
         }
 
