@@ -14,6 +14,8 @@ public class SetFigureUtils {
     private static final double MIN_RATIO = 1.5;
     private static final double MAX_RATIO = 3.0;
     private static final double MIN_RELATIVE_AREA = 0.0005;
+    private static final double MAX_JOIN_RELATIVE_DISTANCE = 1.8;
+    private static final double MIN_COMMON_RELATIVE_AREA = 0.9;
 
     public static boolean checkRatio(int height, int width) {
         return  height >= width * MIN_RATIO &&
@@ -24,19 +26,36 @@ public class SetFigureUtils {
         return area >= imageArea * MIN_RELATIVE_AREA;
     }
 
+    public static boolean isInnerFigure(SetFigure inner, SetFigure outer) {
+        if (inner.getBox().area() >= outer.getBox().area()) {
+            return false;
+        }
+
+        double commonArea = getCommonArea(inner.getBox(), outer.getBox());
+        return commonArea > MIN_COMMON_RELATIVE_AREA * inner.getBox().area();
+    }
+
+    public static double getCommonArea(Rect first, Rect second) {
+        return getCommonBox(first, second).area();
+    }
+
     public static List<SetFigure> filterOutInnerFigures(List<SetFigure> list) {
         List<SetFigure> result = new ArrayList<>();
 
         for (SetFigure figure : list) {
-            boolean inner = false;
-            Rect box = figure.getBox();
+            boolean isInner = false;
 
-            for (SetFigure outerFigure : list) {
-                inner |= outerFigure.getBox().contains(box.tl()) &&
-                         outerFigure.getBox().contains(box.br());
+            for (SetFigure outerFigure : list) if (figure != outerFigure) {
+                isInner |= isInnerFigure(figure, outerFigure);
             }
 
-            if (!inner) {
+            for (SetFigure addedFigure : result) {
+                if (addedFigure.getBox().equals(figure.getBox())) {
+                    isInner = true;
+                }
+            }
+
+            if (!isInner) {
                 result.add(figure);
             }
         }
@@ -54,22 +73,45 @@ public class SetFigureUtils {
         );
 
         distance /= first.getBox().width;
-
-        return false; // TODO
+        return distance < MAX_JOIN_RELATIVE_DISTANCE;
     }
 
-    public static boolean areSame(SetFigure first, SetFigure second) {
+    public static boolean areSimilar(SetFigure first, SetFigure second) {
         return  first.getColor() == second.getColor() &&
                 first.getShading() == second.getShading() &&
                 first.getShape() == second.getShape();
     }
 
     public static boolean areJoinable(SetFigure first, SetFigure second) {
-        return areClose(first, second) && areSame(first, second);
+        return areClose(first, second) && areSimilar(first, second);
+    }
+
+    public static Rect getBoundingBox(Rect first, Rect second) {
+        int xMin = Math.min(first.x, second.x);
+        int xMax = Math.max(first.x + first.width, second.x + second.width);
+        int yMin = Math.min(first.y, second.y);
+        int yMax = Math.max(first.y + first.height, second.y + second.height);
+
+        return new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
+    }
+
+    public static Rect getCommonBox(Rect first, Rect second) {
+        int xMin = Math.max(first.x, second.x);
+        int xMax = Math.min(first.x + first.width, second.x + second.width);
+        int yMin = Math.max(first.y, second.y);
+        int yMax = Math.min(first.y + first.height, second.y + second.height);
+
+        return new Rect(xMin, yMin, Math.max(0, xMax - xMin), Math.max(0, yMax - yMin));
     }
 
     public static Rect getBoundingBox(List<SetFigure> figures) {
-        return figures.get(0).getBox(); // TODO
+        Rect box = figures.get(0).getBox();
+
+        for (SetFigure figure : figures) {
+            box = getBoundingBox(box, figure.getBox());
+        }
+
+        return box;
     }
 
     public static List<SetCard> extractCards(List<SetFigure> figures) {
@@ -80,12 +122,15 @@ public class SetFigureUtils {
         }
 
         for (int i = 0; i < figures.size(); i++) {
-            for (int j = 0; j < figures.size(); j++) {
+            for (int j = i + 1; j < figures.size(); j++) {
                 if (areJoinable(figures.get(i), figures.get(j))) {
                     SetCard merged = SetCard.merge(cards.get(i), cards.get(j));
 
-                    cards.set(i, merged);
-                    cards.set(j, merged);
+                    for (int k = 0; k < cards.size(); k++) {
+                        if (cards.get(k) == cards.get(i) || cards.get(k) == cards.get(j)) {
+                            cards.set(k, merged);
+                        }
+                    }
                 }
             }
         }

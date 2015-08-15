@@ -8,12 +8,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
-
-import org.opencv.android.Utils;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 import krzysztofmaziarz.thesetproject.R;
 import krzysztofmaziarz.thesetproject.core.ImageProcessor;
