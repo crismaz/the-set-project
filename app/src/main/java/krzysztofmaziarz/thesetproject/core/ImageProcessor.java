@@ -47,8 +47,8 @@ public class ImageProcessor {
             }
         }
 
-        figures = SetFigureUtils.filterOutInnerFigures(figures);
-        List<SetCard> cards = SetFigureUtils.extractCards(figures);
+        figures = SetUtils.filterOutInnerFigures(figures);
+        List<SetCard> cards = SetUtils.extractCards(figures);
 
         for (SetCard card : cards) {
             Scalar scalar;

@@ -3,6 +3,8 @@ package krzysztofmaziarz.thesetproject.core;
 import org.opencv.core.Rect;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -10,7 +12,7 @@ import krzysztofmaziarz.thesetproject.model.GridPoint;
 import krzysztofmaziarz.thesetproject.model.SetCard;
 import krzysztofmaziarz.thesetproject.model.SetFigure;
 
-public class SetFigureUtils {
+public class SetUtils {
     private static final double MIN_RATIO = 1.5;
     private static final double MAX_RATIO = 3.0;
     private static final double MIN_RELATIVE_AREA = 0.0005;
@@ -136,5 +138,45 @@ public class SetFigureUtils {
         }
 
         return new ArrayList<>(new HashSet<>(cards));
+    }
+
+    public static Collection<Collection<SetCard>> getSets(List<SetCard> cards) {
+        Collection<Collection<SetCard>> sets = new ArrayList<>();
+
+        for (int i = 0; i < cards.size(); i++) {
+            for (int j = i + 1; j < cards.size(); j++) {
+                for (int k = j + 1; k < cards.size(); k++) {
+                    if (isSet(cards.get(i), cards.get(j), cards.get(k))) {
+                        sets.add(Arrays.asList(
+                                cards.get(i),
+                                cards.get(j),
+                                cards.get(k)
+                        ));
+                    }
+                }
+            }
+        }
+
+        return sets;
+    }
+
+    public static boolean isSet(SetCard first, SetCard second, SetCard third) {
+        return
+                areAllSameOrAllDistinct(first.getColor(), second.getColor(), third.getColor()) &&
+                areAllSameOrAllDistinct(first.getShading(), second.getShading(), third.getShading()) &&
+                areAllSameOrAllDistinct(first.getShape(), second.getShape(), third.getShape());
+    }
+
+    private static boolean areAllSameOrAllDistinct(Object... objects) {
+        int samePairs = 0;
+
+        for (Object first : objects) {
+            for (Object second : objects) {
+                if (first.equals(second)) samePairs++;
+            }
+        }
+
+        return  samePairs == objects.length ||
+                samePairs == objects.length * objects.length;
     }
 }

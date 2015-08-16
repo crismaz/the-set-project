@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import krzysztofmaziarz.thesetproject.core.SetFigureUtils;
+import krzysztofmaziarz.thesetproject.core.SetUtils;
 
 public class SetFigure {
     private Mat image;
@@ -58,8 +58,8 @@ public class SetFigure {
     }
 
     private void computeValid() {
-        valid = SetFigureUtils.checkRatio(box.height, box.width) &&
-                SetFigureUtils.checkArea(box.height * box.width, image.height() * image.width());
+        valid = SetUtils.checkRatio(box.height, box.width) &&
+                SetUtils.checkArea(box.height * box.width, image.height() * image.width());
     }
 
     private void computeColor() {

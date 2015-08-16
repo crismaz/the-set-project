@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import krzysztofmaziarz.thesetproject.core.SetFigureUtils;
+import krzysztofmaziarz.thesetproject.core.SetUtils;
 
 public class SetCard {
     private Color color;
@@ -35,7 +35,7 @@ public class SetCard {
         color = figures.get(0).getColor();
         shading = figures.get(0).getShading();
         shape = figures.get(0).getShape();
-        box = SetFigureUtils.getBoundingBox(figures);
+        box = SetUtils.getBoundingBox(figures);
     }
 
     public List<SetFigure> getFigures() {
