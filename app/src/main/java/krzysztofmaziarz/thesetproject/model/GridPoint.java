@@ -1,13 +1,19 @@
 package krzysztofmaziarz.thesetproject.model;
 
+import org.opencv.core.Point;
+
 public class GridPoint {
-    public int x, y;
+    public int row, col;
 
     /**
      * @param coordinates coordinate array given by matOfPoint.get()
      */
     public GridPoint(double[] coordinates) {
-        x = (int) Math.round(coordinates[1]);
-        y = (int) Math.round(coordinates[0]);
+        col = (int) Math.round(coordinates[0]);
+        row = (int) Math.round(coordinates[1]);
+    }
+
+    public Point asPoint() {
+        return new Point(col, row);
     }
 }

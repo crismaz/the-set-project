@@ -13,6 +13,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import krzysztofmaziarz.thesetproject.model.Color;
@@ -26,7 +27,6 @@ public class ImageProcessor {
     private static final double MIN_CONTOUR_SIZE = 0.05;
 
     public static Bitmap markSets(Bitmap source) {
-        int imageHeight = source.getHeight();
         Mat imageMat = new Mat(source.getHeight(), source.getWidth(), DEFAULT_MAT_TYPE);
         Utils.bitmapToMat(source, imageMat);
 
@@ -35,21 +35,32 @@ public class ImageProcessor {
         List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_NONE);
 
-        List<SetFigure> figures = new ArrayList<>();
-
-        for (MatOfPoint contour : contours) {
-            if (normalize(contour.rows(), imageHeight) > MIN_CONTOUR_SIZE) {
-                SetFigure figure = new SetFigure(imageMat, contour);
-
-                if (figure.isValid()) {
-                    figures.add(figure);
-                }
-            }
-        }
-
-        figures = SetUtils.filterOutInnerFigures(figures);
+        List<SetFigure> figures = getFigures(imageMat, edges);
         List<SetCard> cards = SetUtils.extractCards(figures);
 
+        markCards(imageMat, cards);
+
+        Collection<Collection<SetCard>> sets = SetUtils.getSets(cards);
+
+        char letter = 'A';
+        for (Collection<SetCard> set : sets) {
+            for (SetCard card : set) {
+                Point point = SetUtils.getCenter(card.getBox()).asPoint();
+
+                point.x += 30 * (letter - 'A') - 45;
+                point.y += 15;
+
+                Core.putText(imageMat, String.valueOf(letter), point,
+                        Core.FONT_HERSHEY_PLAIN, 3.0, new Scalar(1), 2);
+            }
+            letter++;
+        }
+
+        Utils.matToBitmap(imageMat, source);
+        return source;
+    }
+
+    private static void markCards(Mat imageMat, List<SetCard> cards) {
         for (SetCard card : cards) {
             Scalar scalar;
 
@@ -69,9 +80,27 @@ public class ImageProcessor {
             Core.putText(imageMat, card.getShape().toString(), new Point(box.x, box.y + box.height),
                     Core.FONT_HERSHEY_PLAIN, 1.0, scalar);
         }
+    }
 
-        Utils.matToBitmap(imageMat, source);
-        return source;
+    private static List<SetFigure> getFigures(Mat imageMat, Mat edges) {
+        int imageHeight = imageMat.rows();
+
+        List<MatOfPoint> contours = new ArrayList<>();
+        Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_NONE);
+
+        List<SetFigure> figures = new ArrayList<>();
+
+        for (MatOfPoint contour : contours) {
+            if (normalize(contour.rows(), imageHeight) > MIN_CONTOUR_SIZE) {
+                SetFigure figure = new SetFigure(imageMat, contour);
+
+                if (figure.isValid()) {
+                    figures.add(figure);
+                }
+            }
+        }
+
+        return SetUtils.filterOutInnerFigures(figures);
     }
 
     private static Mat getEdges(Mat imageMat) {

@@ -54,6 +54,10 @@ public class SetCard {
         return shading;
     }
 
+    public int getAmount() {
+        return figures.size();
+    }
+
     public Rect getBox() {
         return box;
     }

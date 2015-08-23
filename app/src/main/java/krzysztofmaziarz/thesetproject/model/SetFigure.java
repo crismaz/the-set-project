@@ -37,10 +37,10 @@ public class SetFigure {
             points.add(new GridPoint(contour.get(i, 0)));
 
         for (GridPoint point : points) {
-            point.x = Math.max(point.x, 0);
-            point.y = Math.max(point.y, 0);
-            point.x = Math.min(point.x, image.rows() - 1);
-            point.y = Math.min(point.y, image.cols() - 1);
+            point.row = Math.max(point.row, 0);
+            point.col = Math.max(point.col, 0);
+            point.row = Math.min(point.row, image.rows() - 1);
+            point.col = Math.min(point.col, image.cols() - 1);
         }
 
         initialize();
@@ -66,7 +66,7 @@ public class SetFigure {
         avgPixelColor = new double[3];
 
         for (GridPoint point : points) {
-            double[] color = image.get(point.x, point.y);
+            double[] color = image.get(point.row, point.col);
 
             for (int i = 0; i < 3; i++) {
                 avgPixelColor[i] += color[i];
@@ -81,7 +81,8 @@ public class SetFigure {
     }
 
     private void computeShading() {
-        double[] centerPixelColor = image.get(getCenter().x, getCenter().y);
+        GridPoint center = SetUtils.getCenter(box);
+        double[] centerPixelColor = image.get(center.row, center.col);
 
         double change = 0.0;
         for (int i = 0; i < 3; i++) {
@@ -96,12 +97,12 @@ public class SetFigure {
         Map<Integer,Integer> right = new HashMap<>();
 
         for (GridPoint point : points) {
-            if (left.get(point.x) == null || left.get(point.x) > point.y) {
-                left.put(point.x, point.y);
+            if (left.get(point.row) == null || left.get(point.row) > point.col) {
+                left.put(point.row, point.col);
             }
 
-            if (right.get(point.x) == null || right.get(point.x) < point.y) {
-                right.put(point.x, point.y);
+            if (right.get(point.row) == null || right.get(point.row) < point.col) {
+                right.put(point.row, point.col);
             }
         }
 
@@ -153,12 +154,5 @@ public class SetFigure {
 
     public Rect getBox() {
         return box;
-    }
-
-    public GridPoint getCenter() {
-        return new GridPoint(new double[] {
-                (box.br().x + box.tl().x) / 2,
-                (box.br().y + box.tl().y) / 2
-        });
     }
 }

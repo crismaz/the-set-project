@@ -66,12 +66,12 @@ public class SetUtils {
     }
 
     public static boolean areClose(SetFigure first, SetFigure second) {
-        GridPoint centerFirst = first.getCenter();
-        GridPoint centerSecond = second.getCenter();
+        GridPoint centerFirst = getCenter(first.getBox());
+        GridPoint centerSecond = getCenter(second.getBox());
 
         double distance = Math.sqrt(
-                Math.pow(centerFirst.x - centerSecond.x, 2) +
-                Math.pow(centerFirst.y - centerSecond.y, 2)
+                Math.pow(centerFirst.row - centerSecond.row, 2) +
+                Math.pow(centerFirst.col - centerSecond.col, 2)
         );
 
         distance /= first.getBox().width;
@@ -164,7 +164,8 @@ public class SetUtils {
         return
                 areAllSameOrAllDistinct(first.getColor(), second.getColor(), third.getColor()) &&
                 areAllSameOrAllDistinct(first.getShading(), second.getShading(), third.getShading()) &&
-                areAllSameOrAllDistinct(first.getShape(), second.getShape(), third.getShape());
+                areAllSameOrAllDistinct(first.getShape(), second.getShape(), third.getShape()) &&
+                areAllSameOrAllDistinct(first.getAmount(), second.getAmount(), third.getAmount());
     }
 
     private static boolean areAllSameOrAllDistinct(Object... objects) {
@@ -178,5 +179,12 @@ public class SetUtils {
 
         return  samePairs == objects.length ||
                 samePairs == objects.length * objects.length;
+    }
+
+    public static GridPoint getCenter(Rect box) {
+        return new GridPoint(new double[] {
+                (box.br().x + box.tl().x) / 2,
+                (box.br().y + box.tl().y) / 2
+        });
     }
 }
